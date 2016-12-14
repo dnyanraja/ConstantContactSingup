@@ -142,7 +142,12 @@ class ConstantContact_Widget extends WP_Widget {
 			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'];
 		}
 
-		constantcontact_form($instance['cainput'], $instance['listinput'], $instance['firstname']);
+		if(!empty($instance['cainput']) && !empty($instance['listinput']) && !empty($instance['firstname'])){ 
+			constantcontact_form($instance['cainput'], $instance['listinput'], $instance['firstname']);	
+		}
+		else{
+			echo '<p>Please setup CA Input, List Input & First Name in widget settings</p>';
+		}		
 		
 		//echo esc_html__( 'Hello, World!', 'ccsignup' );
 		echo $args['after_widget'];
