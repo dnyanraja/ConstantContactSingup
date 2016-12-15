@@ -1,8 +1,8 @@
 <?php
 /*
-Plugin Name: Constant Contact email singup
+Plugin Name: Constant Contact Email Singup
 Plugin URI: 
-Description: Constant Contant widget for submitting email address to signup for campaign
+Description: Constant Contant widget for submitting email address to signup for campaign, you can also use shortcode.
 Version: 
 Author: Ganesh Veer
 Author URI: 
@@ -11,13 +11,16 @@ License: GPL2
 
 function cc_enqueue_scripts(){
 	//wp_enqueue_style('cc_css', 'https://static.ctctcdn.com/h/contacts-embedded-signup-assets/1.0.2/css/signup-form.css', array(), '1.0.0', 'all');	
-	wp_enqueue_style('ccsingup', plugin_dir_url(__FILE__).'/css/ccsingup.css', array(), '1.0.0', 'all');	
-	//wp_register_script('cc_js', 'https://static.ctctcdn.com/h/contacts-embedded-signup-assets/1.0.2/js/signup-form.js');
-	//wp_enqueue_script( 'cc_js' );
+	wp_enqueue_style('ccsingup', plugin_dir_url(__FILE__).'css/ccsingup.css', array(), '1.0.0', 'all');	
+	wp_register_script('cc_js', plugin_dir_url(__FILE__).'js/ccsingup.js');
+	wp_enqueue_script( 'cc_js' );
 }
 add_action('wp_enqueue_scripts', 'cc_enqueue_scripts');
 
 function constantcontact_form($ca, $listin, $fname){ 
+	if(!isset($ca) || !isset($listin) || !isset($fname)){ 
+		echo '<p>please setup ca input and list input values in backend</p>';
+	}else{
 	?>
 <div class="ctct-embed-signup" style="font: 16px Helvetica Neue, Arial, sans-serif; font: 1rem Helvetica Neue, Arial, sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased;">
    <div style="color:#5b5b5b; background-color:#e8e8e8; border-radius:5px;padding:10px;">
@@ -41,54 +44,8 @@ function constantcontact_form($ca, $listin, $fname){
        </form>
    </div>
 </div>
-<script type='text/javascript'>
-   var localizedErrMap = {};
-   localizedErrMap['required'] = 		'This field is required.';
-   localizedErrMap['ca'] = 			'An unexpected error occurred while attempting to send email.';
-   localizedErrMap['email'] = 			'Please enter your email address in name@email.com format.';
-   localizedErrMap['birthday'] = 		'Please enter birthday in MM/DD format.';
-   localizedErrMap['anniversary'] = 	'Please enter anniversary in MM/DD/YYYY format.';
-   localizedErrMap['custom_date'] = 	'Please enter this date in MM/DD/YYYY format.';
-   localizedErrMap['list'] = 			'Please select at least one email list.';
-   localizedErrMap['generic'] = 		'This field is invalid.';
-   localizedErrMap['shared'] = 		'Sorry, we could not complete your sign-up. Please contact us to resolve this.';
-   localizedErrMap['state_mismatch'] = 'Mismatched State/Province and Country.';
-	localizedErrMap['state_province'] = 'Select a state/province';
-   localizedErrMap['selectcountry'] = 	'Select a country';
-   var postURL = 'https://visitor2.constantcontact.com/api/signup';
-
-jQuery(document).ready(function($){
-	// Attach a submit handler to the form
-	$( "#singupform" ).submit(function( event ) {
-	  	// Stop form from submitting normally
-	  	event.preventDefault();
-  		// Get some values from elements on the page:
-  		var $form 	= $( this ),
-    	caval 		= $form.find( "input[name='ca']" ).val(),
-    	listval 	= $form.find( "input[name='list']" ).val(),
-    	sourceval 	= $form.find( "input[name='source']" ).val(),
-    	urlval 		= $form.find( "input[name='url']" ).val(),
-    	emailval 	= $form.find( "input[name='email']" ).val(),
-    	url 		= $form.attr( "action" );
-  		// Send the data using post
-  		var posting = $.post( url, {ca: caval, list:listval, source:sourceval, url:urlval, email:emailval} );
-   		// Put the results in a div
-		posting.done(function(data) {	  	
-    		if(data.success){
-    			//If Success Remove form and display success message
-    			$( "#singupform" ).fadeOut();
-    			$( "#success_message" ).empty().append('Thanks for signing up! <span class="close" id="close" style="display:inline-block;float:right;">X</span>').fadeIn('slow');	
-	    		}
-  			});
-		});	
-		//Remove success msg and display form again
-		$("#success_message").on("click", function(){
-			$( "#singupform" ).fadeIn("slow");
-			$( "#success_message" ).fadeOut("slow");		
-		});
-});
-</script>
-<?php
+	<?php
+	}
 }
 
 function admin_js_css(){
@@ -130,9 +87,7 @@ class ConstantContact_Widget extends WP_Widget {
 
 	/**
 	 * Front-end display of widget.
-	 *
 	 * @see WP_Widget::widget()
-	 *
 	 * @param array $args     Widget arguments.
 	 * @param array $instance Saved values from database.
 	 */
@@ -141,23 +96,18 @@ class ConstantContact_Widget extends WP_Widget {
 		if ( ! empty( $instance['title'] ) ) {
 			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'];
 		}
-
 		if(!empty($instance['cainput']) && !empty($instance['listinput']) && !empty($instance['firstname'])){ 
 			constantcontact_form($instance['cainput'], $instance['listinput'], $instance['firstname']);	
 		}
 		else{
 			echo '<p>Please setup CA Input, List Input & First Name in widget settings</p>';
 		}		
-		
-		//echo esc_html__( 'Hello, World!', 'ccsignup' );
 		echo $args['after_widget'];
 	}
 
 	/**
 	 * Back-end widget form.
-	 *
 	 * @see WP_Widget::form()
-	 *
 	 * @param array $instance Previously saved values from database.
 	 */
 	public function form( $instance ) {
@@ -185,9 +135,7 @@ class ConstantContact_Widget extends WP_Widget {
 
 	/**
 	 * Sanitize widget form values as they are saved.
-	 *
 	 * @see WP_Widget::update()
-	 *
 	 * @param array $new_instance Values just sent to be saved.
 	 * @param array $old_instance Previously saved values from database.
 	 *
