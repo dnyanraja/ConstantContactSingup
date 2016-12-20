@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Constant Contact Email Singup
+Plugin Name: Email Singup with Constant Contact
 Plugin URI: 
 Description: Constant Contant widget for submitting email address to signup for campaign, you can also use shortcode.
 Version: 
